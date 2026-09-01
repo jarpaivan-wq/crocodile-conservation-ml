@@ -46,17 +46,25 @@ Both columns were dropped from the final feature set, leaving only biological an
 
 Same pipeline, same `random_state`, features already cleaned of proxies:
 
-| Model | Train accuracy | Test accuracy |
-|---|---|---|
-| Random Forest | 99.9% | 51.5% |
-| Decision Tree | 99.9% | 48.5% |
+| Model | Train accuracy | Test accuracy | Notes |
+|---|---|---|---|
+| Random Forest | 99.9% | 51.5% | Ensemble of trees, averages out variance |
+| Decision Tree | 99.9% | 48.5% | Single tree, no depth restriction |
 
-Both memorize the training set (no depth restriction applied); Random Forest generalizes slightly better thanks to averaging across multiple trees, though with only 4 features and a 200-row test set the margin is small.
+**Why both memorize the training set:** neither model has a depth limit (`max_depth`), so each keeps splitting until every leaf is close to pure. That produces near-perfect training accuracy and a real risk of overfitting — the gap between train and test accuracy is the classic symptom.
+
+**Why Random Forest edges ahead:** a single Decision Tree is high-variance — its exact splits depend heavily on the specific `random_state` and the training rows it happens to see. Random Forest trains many trees on bootstrapped samples and random feature subsets, then averages their predictions, which smooths out that variance. Here it's worth a ~3-point accuracy gain.
+
+**A caveat on that 3-point gain:** the test set is only 200 rows, so 3 points is roughly 6 individual predictions. It's a real, consistent edge in this run, but not a large enough sample to call it a decisive win — different `random_state` values would likely move that gap around.
+
+**Trade-off:** Decision Tree loses a bit of accuracy but gains full interpretability — the exact decision logic can be visualized as a single tree diagram. Random Forest is more accurate here but its logic is spread across hundreds of trees, so `feature_importances_` (an aggregated summary) is the closest thing to an explanation it offers.
 
 ## Files
 
 - `random-forest-classifier-crocodile-dataset.ipynb`
 - `decision-tree-classifier-crocodile-dataset.ipynb`
+
+Both notebooks share the same preprocessing pipeline and reference each other as companion notebooks — same exercise, two classifiers.
 
 ## How to run
 
@@ -64,8 +72,7 @@ Both notebooks are set up for Kaggle (they use the `/kaggle/input/...` path). To
 
 ## Links
 
-- Kaggle notebook: *(add link)*
-- LinkedIn post: *(add link)*
+- Kaggle notebook: (https://www.kaggle.com/code/ivanjarp/random-forest-classifier-crocodile-dataset)
 
 ## License
 
